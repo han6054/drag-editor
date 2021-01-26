@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <visual-editor/>
+    <visual-editor v-model="jsonData"/>
     <!-- <test-use-model v-model="val"/>
     {{val}} -->
   </div>
@@ -10,6 +10,7 @@
 import {defineComponent} from 'vue';
 import { VisualEditor } from '@/packages/visual-editor'
 import { TestUseModel } from '@/packages/utils/useModel.tsx'
+
 export default defineComponent({
   name: 'App',
   components: {
@@ -18,7 +19,23 @@ export default defineComponent({
   },
   data() {
     return {
-      val: ''
+      val: '',
+      jsonData: {
+          container : {
+            width: 800,
+            height: 500
+          },
+          blocks: [
+            {
+              top: 100,
+              left: 100
+            },
+             {
+              top: 200,
+              left: 200
+            }
+          ]
+      }
     }
   }
 })

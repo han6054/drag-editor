@@ -20,3 +20,31 @@ export interface VisualEditorModelValue {
     },
     blocks?: VisualEditorBlockData[],
 }
+
+export interface VisualEditorComponent {
+    name: string,
+    preview: () => JSX.Element,
+    render: () => JSX.Element,
+}
+
+export function createVisualEditorConfig() {
+ 
+    const componentList: VisualEditorComponent[] = []
+    const componentMap: Record<string, VisualEditorComponent> = {}
+
+    return {
+        registry: (name: string, component: Omit<VisualEditorComponent, 'name'>) => {
+            let comp = {...component, name}
+            componentList.push(comp)
+            componentMap[name] = comp
+        } 
+    }
+}
+
+export type VisualEditorConfig = ReturnType<typeof createVisualEditorConfig>
+
+const Config = createVisualEditorConfig()
+Config.registry('input', {
+    preview: () => '输入框',
+    render: () => ''
+})
