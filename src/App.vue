@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <visual-editor v-model="jsonData"/>
+    <visual-editor v-model="jsonData" :config="visualConfig"/>
     <!-- <test-use-model v-model="val"/>
     {{val}} -->
   </div>
@@ -9,7 +9,8 @@
 <script lang="ts">
 import {defineComponent} from 'vue';
 import { VisualEditor } from '@/packages/visual-editor'
-import { TestUseModel } from '@/packages/utils/useModel.tsx'
+// import { TestUseModel } from '@/packages/utils/useModel.tsx'
+import { visualConfig } from '@/visual.config'
 
 export default defineComponent({
   name: 'App',
@@ -20,6 +21,7 @@ export default defineComponent({
   data() {
     return {
       val: '',
+      visualConfig,
       jsonData: {
           container : {
             width: 800,
