@@ -26,18 +26,19 @@ export default defineComponent({
           container : {
             width: 800,
             height: 500,
-            componentKey: 'text',
           },
           blocks: [
             {
               top: 100,
               left: 100,
               componentKey: 'button',
+              focus: true,
             },
              {
               top: 200,
               left: 200,
               componentKey: 'input',
+              focus: true,
             }
           ]
       }
