@@ -1,9 +1,10 @@
 import {defineComponent, PropType, computed} from 'vue';
-import {VisualEditorBlockData} from '@/packages/visual-editor.utils'
+import {VisualEditorBlockData, VisualEditorConfig} from '@/packages/visual-editor.utils'
 
 export const VisualEditorBlock = defineComponent({
     props: {
-        block: {type: Object as PropType<VisualEditorBlockData>, required: true}
+        block: {type: Object as PropType<VisualEditorBlockData>, required: true},
+        config: {type: Object as PropType<VisualEditorConfig>, required: true},
     },
     setup(props) {
 
@@ -12,10 +13,15 @@ export const VisualEditorBlock = defineComponent({
             left: `${props.block.left}px`,
             // zIndex: props.block.zIndex,
         }))
-        return () => (
-            <div class="visual-editor-block" style={styles.value}>
-                block
-            </div>
-        )
+    
+        return () => {
+            const component = props.config.componentMap[props.block.componentKey];
+            const Render = component.render();
+            return (
+                <div class="visual-editor-block" style={styles.value}>
+                {Render}
+                </div>
+            )
+        }
     }
 })  

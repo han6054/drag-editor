@@ -7,7 +7,7 @@ import './visual-editor.scss';
 export const VisualEditor = defineComponent({
     props: {
         modelValue: {type: Object as PropType<VisualEditorModelValue>, required: true},
-        config: {type: Object as PropType<VisualEditorConfig>, require: true}
+        config: {type: Object as PropType<VisualEditorConfig>, required: true},
 
     },
     emits: {
@@ -16,7 +16,7 @@ export const VisualEditor = defineComponent({
     setup(props, ctx) {
         
         const dataModel = useModel(() => props.modelValue, val => ctx.emit('update:modelValue', val));
-        console.log(dataModel, 'dataModel');
+        //console.log(dataModel, 'dataModel');
         const containerRef = ref({} as HTMLDivElement);
 
         const containerStyle = computed(() => ({
@@ -24,37 +24,60 @@ export const VisualEditor = defineComponent({
              height: `${dataModel.value.container.height}px`
         }))
 
-        const meunDraggier = {
-            current : {
-                component: null as null | VisualEditorComponent,
-            },
-            dragstart: (e: DragEvent, component: VisualEditorComponent) => {
-                containerRef.value.addEventListener('dragenter', meunDraggier.dragenter);
-                containerRef.value.addEventListener('dragover', meunDraggier.dragover);
-                containerRef.value.addEventListener('dragleave', meunDraggier.dragleave);
-                containerRef.value.addEventListener('drop', meunDraggier.drop);
-                meunDraggier.current.component = component;
-            },
-            dragenter: (e: DragEvent) => e.dataTransfer!.dropEffect = 'move',
-            dragover : (e: DragEvent) => e.preventDefault(),
-            dragleave: (e: DragEvent) => e.dataTransfer!.dropEffect = 'none',
-            dropend: (e: DragEvent) => {
-                containerRef.value.removeEventListener('dragenter', meunDraggier.dragenter);
-                containerRef.value.removeEventListener('dragover', meunDraggier.dragover);
-                containerRef.value.removeEventListener('dragleave', meunDraggier.dragleave);
-                containerRef.value.removeEventListener('drop', meunDraggier.drop);
-                meunDraggier.current.component = null;
-            },
-            drop: (e: DragEvent) => {
-                // console.log('drop', meunDraggier.current.component);
+        const meunDraggier = (() => {
+
+            let component = null as null | VisualEditorComponent;
+
+            const blockHandler = {
+                /**
+                 * 处理菜单组件开始动作
+                 */
+                dragstart: (e: DragEvent, current: VisualEditorComponent) => {
+                    containerRef.value.addEventListener('dragenter', containerHandler.dragenter);
+                    containerRef.value.addEventListener('dragover', containerHandler.dragover);
+                    containerRef.value.addEventListener('dragleave', containerHandler.dragleave);
+                    containerRef.value.addEventListener('drop', containerHandler.drop);
+                    component = current;
+                },
+                 /**
+                 * 处理菜单组件结束动作
+                 */
+                dragend: (e: DragEvent) => {
+                    containerRef.value.removeEventListener('dragenter', containerHandler.dragenter);
+                    containerRef.value.removeEventListener('dragover', containerHandler.dragover);
+                    containerRef.value.removeEventListener('dragleave', containerHandler.dragleave);
+                    containerRef.value.removeEventListener('drop', containerHandler.drop);
+                    component = null;
+                },
+            }
+
+            const containerHandler = {
+                /**
+                 * 菜单组件进入容器的时候设置课放置状态
+                 */
+                dragenter: (e: DragEvent) => e.dataTransfer!.dropEffect = 'move',
+                /**
+                 * 鼠标在容器中连续移动的时候，禁用默认事件
+                 */
+                dragover : (e: DragEvent) => e.preventDefault(),
+                /**
+                 * 在移动过程中如果离开了容器，设置为不可放置状态
+                 */
+                dragleave: (e: DragEvent) => e.dataTransfer!.dropEffect = 'none',
+                /**
+                 * 添加一条组件数据
+                 */
+                drop: (e: DragEvent) => {
                 const blocks = dataModel.value.blocks || []
-                blocks.push({
-                    top: e.offsetY,
-                    left: e.offsetX,
-                })
-                dataModel.value = {...dataModel.value, blocks}
-            }, 
-        }
+                    blocks.push({
+                        top: e.offsetY,
+                        left: e.offsetX,
+                        componentKey: component!.key
+                    })
+                }
+            }
+            return blockHandler
+        })(); 
 
         return () => (
             <div class="visual-editor">
@@ -63,7 +86,7 @@ export const VisualEditor = defineComponent({
                         <div class="visual-editor-menu-item"
                         draggable 
                         onDragstart={(e) => meunDraggier.dragstart(e, component)}
-                        onDragend={meunDraggier.dropend}>
+                        onDragend={meunDraggier.dragend}>
                             <span class="visual-editor-menu-item-label">{component.label}</span>
                             {component.preview()}
                         </div>
@@ -81,7 +104,7 @@ export const VisualEditor = defineComponent({
                             {
                                 !!dataModel.value && !!dataModel.value.blocks && (
                                     dataModel.value.blocks.map((block, index) => (
-                                        <VisualEditorBlock block={block} key={index}/>
+                                        <VisualEditorBlock config={props.config} block={block} key={index}/>
                                     ))
                                 )
                             }

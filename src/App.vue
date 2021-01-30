@@ -25,16 +25,19 @@ export default defineComponent({
       jsonData: {
           container : {
             width: 800,
-            height: 500
+            height: 500,
+            componentKey: 'text',
           },
           blocks: [
             {
               top: 100,
-              left: 100
+              left: 100,
+              componentKey: 'button',
             },
              {
               top: 200,
-              left: 200
+              left: 200,
+              componentKey: 'input',
             }
           ]
       }
