@@ -3,6 +3,7 @@ import { VisualEditorModelValue, VisualEditorConfig, VisualEditorComponent, crea
 import {useModel} from '@/packages/utils/useModel'
 import {VisualEditorBlock} from '@/packages/visual-editor-block';
 import './visual-editor.scss';
+import { useVisualCommand } from './utils/visual-command';
 
 export const VisualEditor = defineComponent({
     props: {
@@ -14,7 +15,9 @@ export const VisualEditor = defineComponent({
         'update:modelValue': (val?: VisualEditorModelValue) => true,
     },
     setup(props, ctx) {
-        
+         /*
+        * 双向绑定 组件中元素数据
+        */
         const dataModel = useModel(() => props.modelValue, val => ctx.emit('update:modelValue', val));
         //console.log(dataModel, 'dataModel');
         const containerRef = ref({} as HTMLDivElement);
@@ -23,6 +26,18 @@ export const VisualEditor = defineComponent({
              width: `${dataModel.value.container.width}px`,
              height: `${dataModel.value.container.height}px`
         }))
+        /*
+        * 计算选中未选中block数据
+        */
+       const focusData = computed(() => {
+           let focus: VisualEditorBlockData[] = []
+           let unfocus: VisualEditorBlockData[] = [];
+           (dataModel.value.blocks || []).forEach(item => (item.focus ? focus : unfocus).push(item))
+           return {
+               focus,
+               unfocus
+           }
+       })
 
         const methods = {
             clearFocus:(block?: VisualEditorBlockData) => {
@@ -33,10 +48,14 @@ export const VisualEditor = defineComponent({
                 }
     
                 blocks.forEach(item => item.focus = false)
-                
-            }
+            },
+            updateBlocks: (blocks: VisualEditorBlockData[]) => {
+                dataModel.value = {...dataModel.value, blocks,}
+            },
         }
-
+        /*
+        * 从菜单拖拽到画布相关动作
+        */
         const meunDraggier = (() => {
 
             let component = null as null | VisualEditorComponent;
@@ -92,6 +111,9 @@ export const VisualEditor = defineComponent({
             return blockHandler
         })(); 
 
+         /*
+        *  画布中选中元素方法
+        */
         const focusHandler = (() => {
             return {
                 container :{
@@ -106,16 +128,70 @@ export const VisualEditor = defineComponent({
                         e.stopPropagation()
                         e.preventDefault()
                         if(e.shiftKey) {
-                            block.focus = !block.focus
+                            if(focusData.value.focus.length <= 1) {
+                                block.focus = true
+                            } else {
+                                block.focus = !block.focus
+                            }
                         } else {
-                            console.log('no shift')
-                            block.focus = true
-                            methods.clearFocus(block)
+                            if(!block.focus) {
+                                block.focus = true
+                                methods.clearFocus(block)
+                            }
                         }
+                        blockDraggier.mousedown(e)
                     }
                 }
             }
         })();
+         /*
+        *  画布中拖拽相关动作
+        */
+        const blockDraggier = (() => {
+            let dragState = {
+                startX: 0,
+                startY: 0,
+                startPos: [] as { top: number, left: number}[]
+            }
+
+            const mousedown  = (e: MouseEvent) => {
+                dragState = {
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    startPos: focusData.value.focus.map(({top, left})=> ({top, left}))
+                }
+                document.addEventListener('mousemove', mousemove)
+                document.addEventListener('mouseup', mouseup)
+            }
+
+            const mousemove = (e: MouseEvent) => {
+                const durX = e.clientX - dragState.startX
+                const durY = e.clientY - dragState.startY
+                focusData.value.focus.forEach((block, index) => {
+                    block.top = dragState.startPos[index].top + durY,
+                    block.left = dragState.startPos[index].left + durX
+                })
+            }
+            const mouseup = (e: MouseEvent) => {
+                document.removeEventListener('mousemove', mousemove)
+                document.removeEventListener('mouseup', mouseup)
+            }
+            return {
+                mousedown
+            }
+        })();
+
+        const commander = useVisualCommand({
+            focusData,
+            updateBlocks: methods.updateBlocks,
+            dataModel,
+        });
+
+        const buttons = [
+            {label: '撤销', icon: 'icon-back', handler: commander.undo, tip: 'ctrl+z'},
+            {label: '撤销', icon: 'icon-forward', handler: commander.redo, tip: 'ctrl+y, ctrl+shift+z'},
+            {label: '删除', icon: 'icon-delete', handler: () => commander.delete(), tip: 'ctrl+d, backspace, delete'},
+        ]
 
         return () => (
             <div class="visual-editor">
@@ -131,7 +207,12 @@ export const VisualEditor = defineComponent({
                     ))}
                 </div>
                 <div class="visual-editor-head">
-                    visual-editor-head
+                    {buttons.map((btn, index) => (
+                    <div key={index} class="visual-editor-head-button" onClick={btn.handler}>
+                        <i class={`iconfont ${btn.icon}`}/>
+                        <span>{btn.label}</span>
+                    </div> )              
+                    )}
                 </div>
                 <div class="visual-editor-operator">
                     visual-editor-operator

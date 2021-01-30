@@ -1,4 +1,3 @@
-import { VisualEditorBlock } from './visual-editor-block';
 
 export interface VisualEditorBlockData {
     componentKey: string,                           // 映射 VisualEditorConfig 中 componentMap 的 component对象
