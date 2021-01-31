@@ -95,5 +95,6 @@ export function useVisualCommand (
         redo: () => commander.state.commands.redo(),
         delete: () => commander.state.commands.delete(),
         clear: () => commander.state.commands.clear(),
+        
     }
 }
