@@ -8,16 +8,20 @@ export function useVisualCommand (
         focusData,
         updateBlocks,
         dataModel,
+        dragstart,
+        dragend,
     }: {
         focusData: {value: {focus: VisualEditorBlockData[], unfocus: VisualEditorBlockData[]}},
         updateBlocks: (blocks: VisualEditorBlockData[]) => void,
         dataModel: { value: VisualEditorModelValue },
+        dragstart: { on: (cb: () => void) => void, off: (cb: () => void) => void },
+        dragend: { on: (cb: () => void) => void, off: (cb: () => void) => void },
     }) {
     const commander = useCommander()
 
     commander.registry({
         name: 'delete',
-        keybroad: ['backspace', 'delete', 'ctrl+d'],
+        keyboard: ['backspace', 'delete', 'ctrl+d'],
         execute: () => {
             console.log('执行删除命令')
             let data = {
@@ -36,6 +40,37 @@ export function useVisualCommand (
             }
         }
     })
+
+    commander.registry({
+        name: 'drag',
+        init() {
+            this.data = {before: null as null | VisualEditorBlockData[],}
+            const handler = {
+                dragstart: () => this.data.before = deepcopy(dataModel.value.blocks || []),
+                dragend: () => commander.state.commands.drag()
+            }
+            dragstart.on(handler.dragstart)
+            dragend.on(handler.dragend)
+            return () => {
+                dragstart.off(handler.dragstart)
+                dragend.off(handler.dragend)
+            }
+        },
+        execute() {
+            let before = this.data.before
+            let after = deepcopy(dataModel.value.blocks || [])
+            return {
+                redo: () => {
+                    updateBlocks(deepcopy(after))
+                },
+                undo: () => {
+                    updateBlocks(deepcopy(before))
+                },
+            }
+        }
+    })
+
+    commander.init();
 
     return {
         undo: () => commander.state.commands.undo(),

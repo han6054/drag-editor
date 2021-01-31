@@ -63,9 +63,3 @@ export function createVisualEditorConfig() {
 }
 
 export type VisualEditorConfig = ReturnType<typeof createVisualEditorConfig>
-
-// const Config = createVisualEditorConfig()
-// Config.registry('input', {
-//     preview: () => '输入框',
-//     render: () => ''
-// })
