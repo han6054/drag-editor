@@ -217,10 +217,10 @@ export const VisualEditor = defineComponent({
                     dataModel.value = data;
                 } catch(e) {
                     console.log(e)
-                    ElMessageBox.alert('解析字符出错 ')
+                    ElMessageBox.alert('解析字符出错')
                 }
             }},
-            {label: '导出', icon: 'icon-import', handler: () => $$dialog.textarea(JSON.stringify(dataModel.value), '导出JSON字符串')},
+            {label: '导出', icon: 'icon-export', handler: () => $$dialog.textarea(JSON.stringify(dataModel.value), '导出JSON字符串')},
             {label: '删除', icon: 'icon-delete', handler: () => commander.delete(), tip: 'ctrl+d, backspace, delete'},
             {label: '清空', icon: 'icon-reset', handler: () => commander.clear()},
         ]
