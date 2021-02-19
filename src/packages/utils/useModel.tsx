@@ -3,7 +3,11 @@ import {ref, watch, defineComponent } from 'vue';
 export function useModel<T>(getter: () => T, emitter: (val: T) => void) {
     const state = ref(getter()) as { value: T }
 
-    watch(getter, val => {
+    /**
+     * @param {Function} 数据源也可以是返回值的getter函数，也可以是ref
+     * @param {Function} 回调函数，回调是仅在侦听源发生更改时调用。
+     */
+    watch(getter, val => { 
         if (val !== state.value) {
             state.value = val
         }
