@@ -88,6 +88,61 @@ export function useVisualCommand (
         }
     })
 
+    commander.registry({
+        name: 'placeTop',
+        keyboard: 'ctrl+up',
+        execute: () => {
+            let data = {
+                before: deepcopy(dataModel.value.blocks|| []),
+                after: deepcopy((() => {
+                    const {focus, unfocus} = focusData.value
+                    const maxZIndex = unfocus.reduce((prev, item) => item.zIndex > prev ? item.zIndex : prev, 0) + 1
+                    console.log(maxZIndex)
+                    focus.forEach(block => block.zIndex = maxZIndex)
+                    return deepcopy(dataModel.value.blocks || [])
+                })()),
+            }
+            return {
+                redo: () => {
+                    updateBlocks(deepcopy(data.after))
+                },
+                undo: () => {
+                    updateBlocks(deepcopy(data.before))
+                },
+            }
+        }
+    })
+
+    commander.registry({
+        name: 'placeBottom',
+        keyboard: 'ctrl+down',
+        execute: () => {
+            let data = {
+                before: deepcopy(dataModel.value.blocks || []),
+                after: deepcopy((() => {
+                    const {focus, unfocus} = focusData.value
+                    let minZIndex = unfocus.reduce((prev, item) => item.zIndex > prev ? item.zIndex : prev, 0) - 1
+                    console.log(minZIndex)
+                    if (minZIndex < 0) {
+                        const dur = Math.abs(minZIndex)
+                        unfocus.forEach(block => block.zIndex += dur)
+                        minZIndex = 0
+                    }
+                    focus.forEach(block => block.zIndex = minZIndex)
+                    return deepcopy(dataModel.value.blocks || [])
+                })()),
+            }
+            return {
+                redo: () => {
+                    updateBlocks(deepcopy(data.after))
+                },
+                undo: () => {
+                    updateBlocks(deepcopy(data.before))
+                },
+            }
+        }
+    })
+
     commander.init();
 
     return {
@@ -95,6 +150,8 @@ export function useVisualCommand (
         redo: () => commander.state.commands.redo(),
         delete: () => commander.state.commands.delete(),
         clear: () => commander.state.commands.clear(),
-        
+        placeTop: () => commander.state.commands.placeTop(),
+        placeBottom: () => commander.state.commands.placeBottom(),
+
     }
 }
