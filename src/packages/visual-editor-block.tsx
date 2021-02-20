@@ -21,6 +21,7 @@ export const VisualEditorBlock = defineComponent({
             top: `${props.block.top}px`,
             left: `${props.block.left}px`,
             zIndex: props.block.zIndex,
+
         }))
 
         onMounted(() => {
@@ -32,6 +33,8 @@ export const VisualEditorBlock = defineComponent({
                 const {offsetHeight, offsetWidth} = el.value
                 block.top = block.top - offsetHeight / 2
                 block.left = block.left - offsetWidth / 2
+                block.width = offsetWidth
+                block.height = offsetHeight 
                 block.adjustPosition = false
             }
         })

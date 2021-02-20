@@ -6,9 +6,9 @@ export interface VisualEditorBlockData {
     adjustPosition: boolean,                        // 是否需要调整位置
     focus: boolean,                                 // 当前是否为选中状态
     zIndex: number,                                 // z-index值
-    // width: number,                                  // 组件宽度
-    // height: number,                                 // 组件高度
-    // hasResize: boolean,                             // 是否调整过宽度或者高度
+    width: number,                                  // 组件宽度
+    height: number,                                 // 组件高度
+    hasResize: boolean,                             // 是否调整过宽度或者高度
     // props: Record<string, any>,                     // 组件的设计属性
     // model: Record<string, string>,                  // 绑定的字段
     // slotName?: string,                              // 组件唯一标识
@@ -29,6 +29,11 @@ export interface VisualEditorComponent {
     render: () => JSX.Element,
 }
 
+export interface VisualEditorMarkLines {
+    x: {left: number, showLeft: number}[],
+    y: {top: number, showTop: number}[]
+}
+
 export function createNewBlocks({
     component,
     top,
@@ -44,7 +49,10 @@ export function createNewBlocks({
         componentKey: component!.key,
         adjustPosition: true,
         focus: false,
-        zIndex: 0
+        zIndex: 0,
+        width: 0,                                  // 组件宽度
+        height: 0,                                 // 组件高度
+        hasResize: false,  
     }
 }
 
