@@ -143,6 +143,33 @@ export function useVisualCommand (
         }
     })
 
+    commander.registry({
+        name: 'updateBlock',
+        execute: (newBlock: VisualEditorBlockData, oldBlock: VisualEditorBlockData) => {
+            let blocks = deepcopy(dataModel.value.blocks || [])
+            let data = {
+                before: blocks,
+                after: (() => {
+                    blocks = [...blocks]
+                    const index = dataModel.value.blocks!.indexOf(oldBlock)
+                    if (index > -1) {
+                        blocks.splice(index, 1, newBlock)
+                    }
+                    return deepcopy(blocks)
+                })(),
+            }
+            return {
+                redo: () => {
+                    updateBlocks(deepcopy(data.after))
+                },
+                undo: () => {
+                    updateBlocks(deepcopy(data.before))
+                },
+            }
+        },
+    })
+
+
     commander.init();
 
     return {
@@ -152,6 +179,6 @@ export function useVisualCommand (
         clear: () => commander.state.commands.clear(),
         placeTop: () => commander.state.commands.placeTop(),
         placeBottom: () => commander.state.commands.placeBottom(),
-
+        updateBlock: (newBlock: VisualEditorBlockData, oldBlock: VisualEditorBlockData) => commander.state.commands.updateBlock(newBlock, oldBlock),
     }
 }
