@@ -28,7 +28,7 @@ export const VisualEditorBlock = defineComponent({
             /**
              * 添加组件的时候调整位置居中
              */
-            const {block} = props;
+            const { block } = props;
             if(block.adjustPosition) {
                 const {offsetHeight, offsetWidth} = el.value
                 block.top = block.top - offsetHeight / 2
