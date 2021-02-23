@@ -53,14 +53,13 @@ export const VisualOperatorEditor = defineComponent({
                     })
                 }
                 Content = <>
-
                 </>
             }
 
             return (
                 <div class="visual-editor-operator">
                     <ElForm>
-                        {Content}
+                        {/* {Content} */}
                     </ElForm>
                 </div>
             )
