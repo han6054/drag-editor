@@ -1,3 +1,4 @@
+import {VisualEditorProps} from './visual-editor-props'
 
 export interface VisualEditorBlockData {
     componentKey: string,                           // 映射 VisualEditorConfig 中 componentMap 的 component对象
@@ -27,7 +28,8 @@ export interface VisualEditorComponent {
     label: string,
     preview: () => JSX.Element,
     render: () => JSX.Element,
-}
+    props?: Record<string, VisualEditorProps>
+} 
 
 export interface VisualEditorMarkLines {
     x: {left: number, showLeft: number}[],

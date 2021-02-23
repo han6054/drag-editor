@@ -2,6 +2,7 @@ import { defineComponent,PropType, computed, ref, reactive, readonly } from 'vue
 import { VisualEditorModelValue, VisualEditorConfig, VisualEditorComponent, createNewBlocks, VisualEditorBlockData } from '@/packages/visual-editor.utils';
 import {useModel} from '@/packages/utils/useModel'
 import {VisualEditorBlock} from '@/packages/visual-editor-block';
+import {VisualOperatorEditor} from '@/packages/visual-editor-operator';
 import './visual-editor.scss';
 import { useVisualCommand } from './utils/visual-command';
 import {createEvent} from "@/packages/plugins/event";
@@ -368,9 +369,7 @@ export const VisualEditor = defineComponent({
                         }
                     )}
                 </div>
-                <div class="visual-editor-operator">
-                    visual-editor-operator
-                </div>
+               <VisualOperatorEditor block={state.selectBlock} config={props.config}/>
                 <div class="visual-editor-body">
                     <div class="visual-editor-content">
                         <div class="visual-editor-container" style={containerStyle.value} ref={containerRef} {...focusHandler.container}>
